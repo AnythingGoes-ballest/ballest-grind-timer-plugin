@@ -1,4 +1,4 @@
-// Grind Timer: a Trackmania-style green timer in the top-left corner of every track.
+// Grind Timer: a Trackmania-style green timer on every track.
 //
 //   0:42:17          total time spent racing (green while a race runs, dark green otherwise)
 //   restarts 36      restarts from the beginning of the track (Backspace, or R before the first checkpoint);
@@ -6,7 +6,20 @@
 //
 // Both come from the game (Race::IsActive, Race::Restarts), not from key presses, so rebinding keys changes
 // nothing. They add up across tracks and survive relaunches (Storage). While the cursor is on screen (the pause
-// menu, for example) a pause and a reset button appear under the timer.
+// menu, for example) the timer can be dragged anywhere, and pause and reset buttons appear under it. Sizes and the
+// background are in the plugin manager's settings.
+
+[Setting name="Time size" min=16 max=160 description="Height of the time, in pixels"]
+float TimeSize = 56;
+
+[Setting name="Restarts size" min=10 max=80 description="Height of the restarts line, in pixels"]
+float RestartsSize = 22;
+
+[Setting name="Background" min=0 max=1 description="How dark the box behind the timer is (0: none)"]
+float BackgroundOpacity = 0.35f;
+
+[Setting name="Show restarts"]
+bool ShowRestarts = true;
 
 const float COUNTING_R = 0.235f, COUNTING_G = 1.0f, COUNTING_B = 0.353f;     // the overlay's green
 const float IDLE_R = 0.157f, IDLE_G = 0.549f, IDLE_B = 0.235f;               // dark green: not racing or paused
@@ -15,7 +28,6 @@ const double SAVE_EVERY = 5.0;                                                //
 UI::Window@ timerWindow;
 UI::Text@ timeText;
 UI::Text@ restartText;
-UI::Window@ controls;
 UI::Button@ pauseButton;
 UI::Button@ resetButton;
 
@@ -36,25 +48,33 @@ void Main()
     seenRestarts = Race::Restarts();
     lastTick = lastSave = Host::Time();
 
+    //   0:42:17
+    //   restarts 36
+    //   [pause timer] [reset]      (only while the cursor is on screen)
     @timerWindow = UI::CreateWindow();
     timerWindow.SetAnchor(0, 0);
     timerWindow.SetPivot(0, 0);
     timerWindow.SetOffset(40, 40);
-    timerWindow.SetBackground(0, 0, 0, 0.35f);
     timerWindow.visible = false;
-    @timeText = timerWindow.AddText(TimeText(), 56);
+    @timeText = timerWindow.AddText(TimeText(), TimeSize);
     timerWindow.NewRow();
-    @restartText = timerWindow.AddText(RestartText(), 22);
-
-    @controls = UI::CreateWindow();
-    controls.SetAnchor(0, 0);
-    controls.SetPivot(0, 0);
-    controls.SetOffset(40, 170);
-    controls.visible = false;
-    @pauseButton = controls.AddButton(paused ? "start timer" : "pause timer");
-    @resetButton = controls.AddButton("reset");
+    @restartText = timerWindow.AddText(RestartText(), RestartsSize);
+    timerWindow.NewRow();
+    @pauseButton = timerWindow.AddButton(paused ? "start timer" : "pause timer");
+    @resetButton = timerWindow.AddButton("reset");
+    timerWindow.movable = true;     // after SetOffset: that is where "reset position" puts it back
+    OnSettingsChanged();
 
     Log::Info("grind timer at " + TimeText() + ", " + restarts + " restarts" + (paused ? " (paused)" : ""));
+}
+
+// The plugin manager changed a setting (sizes, background, restarts line).
+void OnSettingsChanged()
+{
+    timeText.size = TimeSize;
+    restartText.size = RestartsSize;
+    restartText.visible = ShowRestarts;
+    timerWindow.SetBackground(0, 0, 0, BackgroundOpacity);
 }
 
 // H:MM:SS
@@ -88,7 +108,9 @@ void Update(float dt)
 
     bool onTrack = Race::OnTrack();
     timerWindow.visible = onTrack;
-    controls.visible = onTrack && UI::CursorShown();
+    bool cursor = UI::CursorShown();
+    pauseButton.visible = cursor;
+    resetButton.visible = cursor;
 
     if (pauseButton.Clicked())
     {

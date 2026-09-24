@@ -15,12 +15,14 @@ restarts 36    restarts from the beginning of the track
   presses, so rebinding keys changes nothing.
 - The totals add up across tracks and survive relaunches.
 - While the cursor is on screen (the pause menu, for example), **pause timer** and **reset** buttons appear under the
-  timer.
+  timer, and the timer can be dragged anywhere on screen. Its position is remembered.
+- **Settings** (footer **plugins** > **open** > **settings**): the size of the time and of the restarts line, how dark
+  the box behind it is, whether the restarts line shows, and **reset position**.
 
 ## Install
 
 In the game: footer **plugins** > **open** > **plugins** > Grind Timer > **install**. Needs the plugin manager host
-0.3.0 or newer.
+0.4.0 or newer.
 
 ## How it works
 
