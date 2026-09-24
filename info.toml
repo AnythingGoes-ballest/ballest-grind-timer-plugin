@@ -1,6 +1,6 @@
 [meta]
 name = "Grind Timer"
-version = "0.2.0"
+version = "0.2.1"
 author = "AnythingGoes"
 description = "A green Trackmania-style timer of total time racing, with restarts from the beginning counted."
 min_host = "0.4.0"

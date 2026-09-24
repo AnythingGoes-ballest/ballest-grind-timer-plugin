@@ -6,8 +6,11 @@
 //
 // Both come from the game (Race::IsActive, Race::Restarts), not from key presses, so rebinding keys changes
 // nothing. They add up across tracks and survive relaunches (Storage). While the cursor is on screen (the pause
-// menu, for example) the timer can be dragged anywhere, and pause and reset buttons appear under it. Sizes and the
-// background are in the plugin manager's settings.
+// menu, for example) the timer can be dragged anywhere, and pause and reset buttons appear under it. Showing it,
+// its sizes and the background are in the plugin manager's settings.
+
+[Setting name="Show timer" description="Off hides the timer; it keeps counting (use pause timer to stop it)"]
+bool ShowTimer = true;
 
 [Setting name="Time size" min=16 max=160 description="Height of the time, in pixels"]
 float TimeSize = 56;
@@ -107,7 +110,7 @@ void Update(float dt)
     lastTick = now;
 
     bool onTrack = Race::OnTrack();
-    timerWindow.visible = onTrack;
+    timerWindow.visible = onTrack && ShowTimer;
     bool cursor = UI::CursorShown();
     pauseButton.visible = cursor;
     resetButton.visible = cursor;
