@@ -1,0 +1,10 @@
+[meta]
+name = "Grind Timer"
+version = "0.1.0"
+author = "AnythingGoes"
+description = "A green Trackmania-style timer of total time racing, with restarts from the beginning counted."
+min_host = "0.3.0"
+
+[script]
+files = ["main.as"]
+timeout = 20
