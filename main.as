@@ -1,6 +1,7 @@
 // Grind Timer: a Trackmania-style green timer on every track.
 //
-//   0:42:17          total time spent racing (green while a race runs, dark green otherwise)
+//   0:42:17          total time spent racing (green while a race runs, dark green otherwise), or with "Count all
+//                    time" on, all the time the game is open (in menus and loading too)
 //   restarts 36      restarts from the beginning of the track (Backspace, or R before the first checkpoint);
 //                    checkpoint respawns and falls don't count
 //
@@ -11,6 +12,9 @@
 
 [Setting name="Show timer" description="Off hides the timer; it keeps counting (use pause timer to stop it)"]
 bool ShowTimer = true;
+
+[Setting name="Count all time" description="On: counts all the time the game is open. Off: only time spent racing"]
+bool CountAllTime = false;
 
 [Setting name="Time size" min=16 max=160 description="Height of the time, in pixels"]
 float TimeSize = 56;
@@ -105,8 +109,8 @@ void Update(float dt)
 {
     double now = Host::Time();
     double step = now - lastTick;
-    if (step > 1.0)
-        step = 1.0;                 // a hitch or a long load never adds more than a second
+    if (step > 1.0 && !CountAllTime)
+        step = 1.0;                 // racing time: a hitch or a long load never adds more than a second
     lastTick = now;
 
     bool onTrack = Race::OnTrack();
@@ -138,7 +142,7 @@ void Update(float dt)
     }
     seenRestarts = nowRestarts;
 
-    bool counting = onTrack && Race::IsActive() && !paused;
+    bool counting = !paused && (CountAllTime || (onTrack && Race::IsActive()));
     if (counting)
     {
         seconds += step;
